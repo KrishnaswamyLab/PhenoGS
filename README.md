@@ -1,5 +1,5 @@
 # PhenoGS
-Pheno-GS: Phenoscape-scale Geodesic Sinkhorn.
+Code for the paper Pheno-GS: Phenoscape-scale Geodesic Sinkhorn.
 
 > [!NOTE]  
 >This repository is still in development.
