@@ -18,7 +18,7 @@ We build a graph between 5 Gaussian distributions and compute the pairwise dista
 ```python
 import numpy as np
 import pandas as pd
-import pheno_gs_bms_lib as pgb
+import phenoGS_bms as bms
 
 SOURCE = 'file'
 t = 10.0
