@@ -27,10 +27,9 @@ def graph_connectivity(O, N, K_NN, t):
     D = np.diag(np.sum(K_NN, axis=1))
     epsilon = 1e-8  # Small value to avoid division by zero
     D += np.eye(D.shape[0]) * epsilon
-    D_inv = np.where(D != 0.0, 1.0 / D, 0.0)
+    D_inv = np.divide(1.0, D, out=np.zeros_like(D), where=(D != 0.0))
     P_NN = D_inv @ K_NN
-    #P_NN_powered = np.linalg.matrix_power(P_NN, t)
-    P_NN_powered = P_NN
+    P_NN_powered = np.linalg.matrix_power(P_NN, t)
     N_graph_connectivity = P_NN_powered @ N
     all_points = np.vstack([O, N_graph_connectivity])
     return N_graph_connectivity, all_points

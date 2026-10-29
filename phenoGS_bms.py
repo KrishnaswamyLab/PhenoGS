@@ -68,6 +68,11 @@ def load_and_filter_data(csv_path, markers, source_col='file'):
     """
     Load the CSV, restrict to the marker columns, and compute the
     grouping information keyed by `source_col`.
+
+    Note: `markers` must include `source_col` (e.g. 'file'), since the
+    grouping column is needed after the DataFrame is restricted to `markers`.
+    This helper is a convenience for loading data from disk; it is NOT called
+    by `run_pipeline`, which expects an already-loaded DataFrame.
     """
     df = pd.read_csv(csv_path)
     df = df[markers]
@@ -104,21 +109,16 @@ def compute_spectral_params(L, k, t):
 
 def build_group_index_arrays(condition_keys, group_indices):
     """
-    Build per-condition contiguous row ranges, per-cell scale values, and
+    Build per-condition row index arrays, per-cell scale values, and
     per-column normalizing scale factors.
+
+    Each condition is represented as a uniform distribution (mass 1/n_c on
+    each of its n_c cells). The row indices come directly from the groupby,
+    so the rows of a condition do NOT need to be contiguous in the DataFrame.
     """
     condition_ncells = {key: len(idx) for key, idx in group_indices.items()}
 
     print('Building group index/scale arrays ...')
-    starts, lengths = [], []
-    for key in condition_keys:
-        idx = group_indices[key]
-        if len(idx) == 0:
-            starts.append(0)
-            lengths.append(0)
-            continue
-        starts.append(int(idx.min()))
-        lengths.append(int(idx.max()) - int(idx.min()) + 1)
 
     col_scales = np.array(
         [1.0 / condition_ncells[key] if condition_ncells[key] > 0 else 0.0
@@ -128,14 +128,14 @@ def build_group_index_arrays(condition_keys, group_indices):
 
     rows_per_cond = []
     data_per_cond = []
-    for j, (start, length) in enumerate(zip(starts, lengths)):
-        if length == 0:
+    for j, key in enumerate(condition_keys):
+        rows_j = np.asarray(group_indices[key], dtype=np.int64)
+        if rows_j.size == 0:
             rows_per_cond.append(np.array([], dtype=np.int64))
             data_per_cond.append(np.array([], dtype=np.float64))
             continue
-        rows_j = np.arange(start, start + length, dtype=np.int64)
         rows_per_cond.append(rows_j)
-        data_per_cond.append(np.full(length, col_scales[j], dtype=np.float64))
+        data_per_cond.append(np.full(rows_j.size, col_scales[j], dtype=np.float64))
 
     return condition_ncells, col_scales, rows_per_cond, data_per_cond
 

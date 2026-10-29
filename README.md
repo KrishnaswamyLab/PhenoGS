@@ -5,15 +5,13 @@ Code for the paper Pheno-GS: Phenoscape-scale Geodesic Sinkhorn.
 >This repository is still in development.
 
 ### Installation
-using Git, by first cloning the repository and running:
+Clone the repository and run:
 ```bash
 pip install -e .
 ```
+Runtime dependencies (NumPy, SciPy, pandas, scikit-learn, joblib, matplotlib, graphtools, PyGSP) are installed automatically; they are also listed in `requirements.txt`.
 
 ### Minimal Example
-You can reproduce this example in the following notebook
-
-
 We build a graph between 5 Gaussian distributions and compute the pairwise distance between signals on that graph.
 ```python
 import numpy as np
@@ -54,7 +52,13 @@ print(D_df)
 
 bms.plot_matrix(D_df.values, title='Synthetic data test')
 ```
-Note that it is also possible to provide a graph instance directly to the `GeoSinkhorn` class with `GeoSinkhorn(tau=1.0, order=10, method="cheb", graph=graph)`. The `graph` must have a Laplacian attribute `graph.L`. We suggest using a sparse Laplacian (e.g. in COO format) for better performance.
+The rows of a condition do not need to be contiguous in the DataFrame; conditions are identified purely by the value in `source_col`.
+
+The repository also provides:
+- `phenoGS_ugs.py` — `UGS(L, m_0, m_1, phi, coeff, reg_m, t, k, ...)`, the iterative unbalanced geodesic Sinkhorn between two signals `m_0`, `m_1` on a graph with Laplacian `L` (pass `P=True` to also return the transport plan; `reg_m=None` gives the balanced problem).
+- `phenoGS_gc.py` — reference-point selection and graph-connectivity utilities.
+
+`L` can be any (preferably sparse) graph Laplacian; `phi` and `coeff` can be obtained with `phenoGS_bms.compute_spectral_params(L, k, t)`.
 
 ### How to Cite
 
@@ -68,7 +72,7 @@ Wilkinson, A., Tape, C. J., & Krishnaswamy, S. (2026). Pheno-GS: Phenoscape-scal
 @inproceedings{wilkinson2026phenoGS,
   title={Pheno-GS: Phenoscape-scale Geodesic Sinkhorn},
   author={Wilkinson, Alistair and Tape, Christopher J and Krishnaswamy, Smita},
-  booktitle={2026 IEEE International Workshop on Machine Learning for Signal Processing (MLSP},
+  booktitle={2026 IEEE International Workshop on Machine Learning for Signal Processing (MLSP)},
   pages={1--6},
   year={2026},
   organization={IEEE}

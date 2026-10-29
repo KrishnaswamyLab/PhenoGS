@@ -40,17 +40,20 @@ def UGS(
     v = np.ones(N)
     w = np.ones(N)
     a = np.ones(N) / N
-    if isinstance(reg_m, (int, float)):
+    # reg_m: scalar or length-1/2 sequence -> unbalanced (KL marginal penalty);
+    #        None -> balanced (exponents fi_1 = fi_2 = 1).
+    if reg_m is None:
+        fi_1 = fi_2 = 1.0
+    else:
         reg_m1, reg_m2 = get_parameter_pair(reg_m)
-        
-    fi_1 = reg_m1 / (reg_m1 + t) if isinstance(reg_m, (int, float)) else 1.0 
-    fi_2 = reg_m2 / (reg_m2 + t) if isinstance(reg_m, (int, float)) else 1.0
+        fi_1 = reg_m1 / (reg_m1 + t)
+        fi_2 = reg_m2 / (reg_m2 + t)
 
     for i in range(1, int(max_iter) + 1):
         v_prev = v
         w_prev = w
-        v = (m_0 / (expm_multiply(L, a * w, phi, coeff, t, k, err) + eps)) #** fi_1
-        w = (m_1 / (expm_multiply(L, a * v, phi, coeff, t, k, err) + eps)) #** fi_2\
+        v = (m_0 / (expm_multiply(L, a * w, phi, coeff, k) + eps)) #** fi_1
+        w = (m_1 / (expm_multiply(L, a * v, phi, coeff, k) + eps)) #** fi_2
         v = np.clip(v, eps, 1e32)
         w = np.clip(w, eps, 1e32)
         v = v ** fi_1
@@ -83,7 +86,7 @@ def UGS(
     else:
         dist = np.sum(4 * a * t * (m_0 * np.log(v + eps) + m_1 * np.log(w + eps)))
         I = np.eye(L.shape[0])
-        K_heat = expm_multiply(L, I, phi, coeff, t, k, err)
+        K_heat = expm_multiply(L, I, phi, coeff, k)
 
         Plan = np.diag(v) @ K_heat @ np.diag(w)
         return dist, Plan
