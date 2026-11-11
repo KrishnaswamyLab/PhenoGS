@@ -101,7 +101,7 @@ def build_graph_laplacian(df, source_col='file', knn=10):
 
 def compute_spectral_params(L, k, t):
     """Compute the top eigenvalue-derived phi and Chebyshev coefficients."""
-    phi = eigsh(L, k=k, return_eigenvectors=False)[0] / 2
+    phi = eigsh(L, k=1, return_eigenvectors=False)[0] / 2
     coeff = compute_chebychev_coeff_all(phi, t, k)
     return phi, coeff
 
